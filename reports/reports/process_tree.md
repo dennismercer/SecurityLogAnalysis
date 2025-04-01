@@ -1,0 +1,13 @@
+- process_id: 15150, parent_id: 100, executable_path: C:/Users/Admin/Downloads/image_resizer.exe, user: admin, start_time: 2025-03-01 09:00:21
+  - File Event: 2025-03-01 09:00:22 | Operation: write | Path: C:/Users/Admin/AppData/Local/Temp/system_update.exe
+  - process_id: 15151, parent_id: 15150, executable_path: C:/Users/Admin/AppData/Local/Temp/system_update.exe, user: admin, start_time: 2025-03-01 09:00:41
+    - Registry Event: 2025-03-01 09:00:42 | Operation: create | Key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run | Value: SystemUpdateService = C:/Users/Admin/AppData/Local/Temp/system_update.exe
+    - process_id: 15152, parent_id: 15151, executable_path: C:/Users/Admin/AppData/Local/Temp/system_update.exe, user: admin, start_time: 2025-03-01 09:00:46
+      - process_id: 15153, parent_id: 15152, executable_path: C:/Users/Admin/AppData/Local/Temp/system_update.exe, user: admin, start_time: 2025-03-01 09:01:11
+        - File Event: 2025-03-01 09:01:32 | Operation: modify | Path: C:/Windows/System32/drivers/etc/hosts
+        - Registry Event: 2025-03-01 09:01:37 | Operation: modify | Key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies | Value: DisableTaskMgr = 1
+        - process_id: 15154, parent_id: 15153, executable_path: C:/Users/Admin/AppData/Local/Temp/system_update.exe, user: admin, start_time: 2025-03-01 09:01:01
+          - Network Event: 2025-03-01 09:01:02 | SrcIP: 192.168.1.10:54321 → DstIP: 192.168.1.100:8080
+          - process_id: 15164, parent_id: 15165, executable_path: C:/Users/Admin/AppData/Local/Temp/system_update.exe, user: admin, start_time: 2025-03-01 09:03:40
+            - process_id: 15165, parent_id: 15164, executable_path: C:/Users/Admin/AppData/Local/Temp/system_update.exe, user: admin, start_time: 2025-03-01 09:03:30
+              - process_id: 15164 (cycle detected, already visited)
