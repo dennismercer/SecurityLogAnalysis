@@ -40,7 +40,19 @@ project_root/
 pip install -r requirements.txt
 ```
 
-### 2. Prepare Input Data
+### 2. Configure Your OpenAI API Key
+
+This project uses OpenAI’s GPT models for summarization. Add your API key to a `.env` file:
+
+```
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+> Place the `.env` file in your project root. Do not commit it to version control.
+
+---
+
+### 3. Prepare Input Data
 
 Place the following CSV files into the `/data/` folder:
 
@@ -96,11 +108,11 @@ Events are summarized using OpenAI's GPT-3.5 to generate concise, security-focus
 
 ## MITRE ATT&CK Integration
 
-LLM summaries are scanned for behavior keywords and mapped to official MITRE ATT&CK techniques from the `enterprise-attack.json` dataset. Enrichment adds:
+LLM summaries are scanned for behavior keywords and matched to official MITRE ATT&CK techniques from the `enterprise-attack.json` dataset. Enrichment adds:
 
 - `mitre_technique`
 - `mitre_id` (e.g., `T1059`)
-- `mitre_tactic` (placeholder or extended via future release)
+- `mitre_tactic` (placeholder or extended via future enhancement)
 
 ---
 
