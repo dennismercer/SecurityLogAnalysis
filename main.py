@@ -17,13 +17,15 @@ from visualizations import (
     plot_event_timeline,
     plot_top_talkers
 )
+from llm_summarizer import summarize_event
+from mitre_lookup import enrich_with_mitre
 
 def clean_and_save(df_loader, input_file, output_file):
     df = df_loader(input_file)
     df.to_csv(output_file, index=False)
     return df
 
-def run_pipeline(input_dir: str, output_dir: str):
+def run_pipeline(input_dir: str, output_dir: str, test_mode: bool = False):
     input_path = Path(input_dir)
     output_path = Path(output_dir)
     data_path = output_path / "data"
@@ -78,8 +80,21 @@ def run_pipeline(input_dir: str, output_dir: str):
 
     print("Unifying event stream")
     unified_df = unify_event_stream(process_df, network_df, file_df, registry_df)
+
+    if test_mode:
+        print("Test mode enabled: limiting rows to 5 for LLM + MITRE enrichment")
+        unified_df = unified_df.head(5).copy()
+
     unified_df.to_csv(data_path / "unified_events.csv", index=False)
-    # Generate visual summaries from unified event stream
+
+    print("Summarizing events with LLM")
+    unified_df["llm_summary"] = unified_df.apply(summarize_event, axis=1)
+
+    print("Enriching with MITRE ATT&CK techniques")
+    unified_df = enrich_with_mitre(unified_df)
+    unified_df.to_csv(data_path / "unified_events_enriched.csv", index=False)
+
+    print("Generating visualizations")
     plot_event_type_distribution(unified_df, reports_path / "event_type_distribution.png")
     plot_event_timeline(unified_df, reports_path / "event_timeline.png")
     plot_top_talkers(unified_df, reports_path / "top_talkers.png")
@@ -87,16 +102,20 @@ def run_pipeline(input_dir: str, output_dir: str):
     print("Building process tree for PID 15150")
     graph = build_process_tree(process_df)
     write_process_tree_markdown_safe(graph, 15150, file_df, network_df, registry_df, reports_path / "process_tree.md")
-    write_error_report(reports_path / "errors.md")  
+
+    print("Writing error documentation")
+    write_error_report(reports_path / "errors.md")
 
     print("All steps completed successfully.")
-    print(f"  --> Cleaned data saved to: {data_path}")
-    print(f"  --> Process tree saved to: {reports_path / 'process_tree.md'}")
+    print(f"  --> Enriched unified data: {data_path / 'unified_events_enriched.csv'}")
+    print(f"  --> Process tree report:   {reports_path / 'process_tree.md'}")
+    print(f"  --> Error documentation:   {reports_path / 'errors.md'}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run full synthetic log analysis pipeline.")
     parser.add_argument("--input_dir", required=True, help="Input directory with raw CSVs")
     parser.add_argument("--output_dir", required=True, help="Output directory for processed files and reports")
+    parser.add_argument("--test_mode", action="store_true", help="Run in test mode with limited rows")
     args = parser.parse_args()
 
-    run_pipeline(args.input_dir, args.output_dir)
+    run_pipeline(args.input_dir, args.output_dir, test_mode=args.test_mode)

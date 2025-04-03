@@ -1,5 +1,9 @@
 pandas
 numpy
-networkx
-python-dateutil
 matplotlib
+tqdm
+openai
+python-dotenv
+langchain==0.1.17
+langchain-community
+langchain-openai

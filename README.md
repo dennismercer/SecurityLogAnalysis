@@ -6,9 +6,11 @@
 This project simulates real-world system activity log analysis for security threat detection. It processes a synthetic dataset containing `process`, `network`, `file`, and `registry` event logs from a single machine and generates:
 
 - A unified, cleaned event stream
+- LLM-generated behavioral summaries for each event
+- MITRE ATT&CK enrichment for context on adversarial techniques
 - A process tree report focused on a malicious process (`process_id = 15150`)
 - Documentation of data anomalies and resolutions
-- Visualizations to highlight behavior and activity patterns
+- Visualizations to highlight behavioral trends
 
 ---
 
@@ -47,7 +49,10 @@ Place the following CSV files into the `/data/` folder:
 - `file_events.csv`
 - `registry_events.csv`
 
-Or use the prep script to copy them from root into `/data/`:
+Also place:
+- `enterprise-attack.json` from MITRE CTI repo into `/data/`
+
+Or use the prep script to copy raw files from root:
 
 ```bash
 python scripts/prepare_data.py
@@ -61,52 +66,59 @@ python scripts/prepare_data.py
 python main.py --input_dir ./data --output_dir ./reports
 ```
 
-This will:
-- Clean and normalize the input logs
-- Generate `cleaned_*.csv` and `unified_events.csv` inside `/reports/data/`
-- Generate:
-  - `process_tree.md` for malicious PID 15150
-  - `errors.md` describing data anomalies
-  - Three visualizations:
-    - `event_type_distribution.png`
-    - `event_timeline.png`
-    - `top_talkers.png`
+Optional test mode (limits LLM/MITRE processing to 5 rows):
+
+```bash
+python main.py --input_dir ./data --output_dir ./reports --test_mode
+```
 
 ---
 
-## Key Files and Outputs
+## Key Outputs
 
-| File                                 | Description                                                   |
-|--------------------------------------|---------------------------------------------------------------|
-| `main.py`                            | CLI script to run the full pipeline                           |
-| `src/cleaning.py`                    | Cleans and standardizes `process_events.csv`                  |
-| `src/integration.py`                 | Merges all event types into a unified stream                  |
-| `src/process_tree.py`                | Builds and outputs a Markdown process tree                    |
-| `src/visualizations.py`              | Creates timeline and behavioral charts                        |
-| `reports/data/unified_events.csv`    | Unified event log sorted chronologically                      |
-| `reports/process_tree.md`            | Detailed tree of PID 15150 and child process activity         |
-| `reports/errors.md`                  | Data quality issues and cleaning methodology                  |
-| `reports/event_type_distribution.png`| Bar chart of event type counts                                |
-| `reports/event_timeline.png`         | Time-based volume of event activity                           |
-| `reports/top_talkers.png`            | Top 10 `process_id`s by total event count                     |
+| File                                  | Description                                                      |
+|---------------------------------------|------------------------------------------------------------------|
+| `unified_events.csv`                  | Unified cleaned event stream                                     |
+| `unified_events_enriched.csv`         | Unified log with LLM summaries and MITRE ATT&CK mappings         |
+| `process_tree.md`                     | Markdown tree of PID 15150 and child activity                    |
+| `errors.md`                           | Data anomalies and resolution documentation                      |
+| `event_type_distribution.png`         | Bar chart showing event type frequencies                         |
+| `event_timeline.png`                  | Time series of event frequency                                   |
+| `top_talkers.png`                     | Top processes by number of events                                |
+
+---
+
+## LLM Integration
+
+Events are summarized using OpenAI's GPT-3.5 to generate concise, security-focused behavioral interpretations. Results are stored in the `llm_summary` column of the unified output.
+
+---
+
+## MITRE ATT&CK Integration
+
+LLM summaries are scanned for behavior keywords and mapped to official MITRE ATT&CK techniques from the `enterprise-attack.json` dataset. Enrichment adds:
+
+- `mitre_technique`
+- `mitre_id` (e.g., `T1059`)
+- `mitre_tactic` (placeholder or extended via future release)
 
 ---
 
 ## Design Considerations
 
-- Modular pipeline built for clarity and maintainability
-- Explicit handling of data anomalies (missing values, time drift, corruption)
-- Cycle-safe process tree traversal
-- UTF-8 support for cross-platform Markdown compatibility
-- Bonus visualizations to provide operational insight
+- Modular pipeline for flexibility and future expansion
+- Cycle-safe graph traversal in process tree generation
+- Visualizations to support quick pattern recognition
+- Support for `.env`-based API key management
+- Ready for async or batch LLM enhancement
 
 ---
 
 ## Notes
 
-- `schemas/` and `config/` folders are included for extensibility
-- No external APIs or services are used
-- Output is portable and reproducible across platforms
+- `schemas/` and `config/` folders are placeholders for future expansion
+- LLM model can be configured in `llm_summarizer.py`
+- Test mode avoids full OpenAI billing during development
 
 ---
 
